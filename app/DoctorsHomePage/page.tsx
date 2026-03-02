@@ -59,15 +59,30 @@ export default function DoctorsHomePage() {
     }
   }, [openReviewId, doctors]);
 
-  async function fetchDoctors() {
-    try {
-      const res = await fetch(`${BASE_URL}/api/doctors`);
-      const data = await res.json();
-      setDoctors(data);
-    } catch (err) {
-      console.error("Error fetching doctors:", err);
-    }
+  // async function fetchDoctors() {
+  //   try {
+  //     const res = await fetch(`${BASE_URL}/api/doctors`);
+  //     const data = await res.json();
+  //     setDoctors(data);
+  //   } catch (err) {
+  //     console.error("Error fetching doctors:", err);
+  //   }
+  // }
+
+
+async function fetchDoctors() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/doctors`, {
+      method: "GET",
+      credentials: "include" // important if backend sets cookies/session
+    });
+    const data = await res.json();
+    setDoctors(data);
+  } catch (err) {
+    console.error("Error fetching doctors:", err);
   }
+}
+
 
   const fetchDoctorReviews = async (doctorId: string) => {
     try {
