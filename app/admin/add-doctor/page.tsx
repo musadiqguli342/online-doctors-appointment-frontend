@@ -128,10 +128,50 @@ export default function AddDoctorPage() {
 
   // ================= ADD =================
 
+  // const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
+
+  //   e.preventDefault();
+
+  //   const payload = new FormData();
+
+  //   Object.entries(formData).forEach(([key, value]) => {
+  //     if (key === "image" && value) payload.append("image", value);
+  //     else payload.append(key, value as string);
+  //   });
+
+  //   payload.append("availabilitySlots", JSON.stringify(availability));
+
+  //   await fetch(`${API_URL}/api/doctors`, {
+  //     method: "POST",
+  //     body: payload,
+  //   });
+
+  //   showToast("Doctor added", "success");
+
+  //   setFormData({
+  //     name: "",
+  //     specialization: "",
+  //     email: "",
+  //     phone: "",
+  //     experience: "",
+  //     education: "",
+  //     certifications: "",
+  //     languages: "",
+  //     hospital: "",
+  //     image: null,
+  //   });
+
+  //   setPreview(null);
+  //   setAvailability([]);
+  //   fetchDoctors();
+  // };
+
+
+
   const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    e.preventDefault();
-
+  try {
     const payload = new FormData();
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -141,10 +181,18 @@ export default function AddDoctorPage() {
 
     payload.append("availabilitySlots", JSON.stringify(availability));
 
-    await fetch(`${API_URL}/api/doctors`, {
+    const res = await fetch(`${API_URL}/api/doctors`, {
       method: "POST",
       body: payload,
     });
+
+    const data = await res.json();
+    console.log("RESPONSE:", data);
+
+    if (!res.ok) {
+      showToast(data.message || "Failed to add doctor", "error");
+      return;
+    }
 
     showToast("Doctor added", "success");
 
@@ -164,8 +212,12 @@ export default function AddDoctorPage() {
     setPreview(null);
     setAvailability([]);
     fetchDoctors();
-  };
 
+  } catch (error) {
+    console.error("ADD ERROR:", error);
+    showToast("Server error", "error");
+  }
+};
   // ================= UPDATE =================
 
   const handleUpdate = async (e: FormEvent<HTMLFormElement>) => {
