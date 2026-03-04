@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
+import AdminSidebar from "@/components/AdminSidebar";
 import { showToast } from "@/utils/toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -178,9 +179,13 @@ export default function AddDoctorPage() {
       else payload.append(key, value as string);
     });
 
-   payload.append("availabilitySlots", JSON.stringify(availability));
+    payload.append("availabilitySlots", JSON.stringify(availability));
 
-    const res = await fetch(`${API_URL}/api/doctors`, { method: "POST", body: payload });
+    const res = await fetch(`${API_URL}/api/doctors`, {
+      method: "POST",
+      body: payload,
+    });
+
     const data = await res.json();
     console.log("RESPONSE:", data);
 
