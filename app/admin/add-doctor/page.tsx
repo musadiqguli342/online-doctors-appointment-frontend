@@ -190,14 +190,15 @@ export default function AddDoctorPage() {
     payload.append("availabilitySlots", JSON.stringify(availability));
 
     // POST to backend
-    const res = await fetch(`${API_URL}/api/doctors`, {
-      method: "POST",
-      body: payload,
-    });
+    const res = await fetch(`${API_URL}/api/doctors`);
 
-    const data = await res.json();
-    console.log("RESPONSE:", data);
+if (!res.ok) {
+  const text = await res.text();
+  console.error("Server Error:", text);
+  return;
+}
 
+const data = await res.json();
     if (!res.ok) {
       return showToast(data.message || "Failed to add doctor", "error");
     }
