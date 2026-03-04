@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
-import AdminSidebar from "@/components/AdminSidebar";
 import { showToast } from "@/utils/toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -169,18 +168,28 @@ export default function AddDoctorPage() {
 
 
   const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  e.preventDefault(); // prevent page reload
 
   try {
+    if (!formData.name || !formData.specialization || !formData.email || !formData.phone) {
+      return showToast("Please fill all required fields", "error");
+    }
+
     const payload = new FormData();
 
+    // append text fields
     Object.entries(formData).forEach(([key, value]) => {
-      if (key === "image" && value) payload.append("image", value);
-      else payload.append(key, value as string);
+      if (key === "image" && value) {
+        payload.append("image", value as File); // File object for image
+      } else {
+        payload.append(key, value as string); // string for other fields
+      }
     });
 
+    // append availability slots
     payload.append("availabilitySlots", JSON.stringify(availability));
 
+    // POST to backend
     const res = await fetch(`${API_URL}/api/doctors`, {
       method: "POST",
       body: payload,
@@ -190,12 +199,12 @@ export default function AddDoctorPage() {
     console.log("RESPONSE:", data);
 
     if (!res.ok) {
-      showToast(data.message || "Failed to add doctor", "error");
-      return;
+      return showToast(data.message || "Failed to add doctor", "error");
     }
 
-    showToast("Doctor added", "success");
+    showToast("Doctor added successfully", "success");
 
+    // Reset form
     setFormData({
       name: "",
       specialization: "",
@@ -208,9 +217,10 @@ export default function AddDoctorPage() {
       hospital: "",
       image: null,
     });
-
     setPreview(null);
     setAvailability([]);
+
+    // Refresh doctor list
     fetchDoctors();
 
   } catch (error) {
