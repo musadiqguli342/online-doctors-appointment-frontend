@@ -77,10 +77,16 @@ export default function AddDoctorPage() {
   // ================= FETCH =================
 
   const fetchDoctors = async () => {
+  try {
     const res = await fetch(`${API_URL}/api/doctors`);
+
     const data = await res.json();
+
     setDoctors(data);
-  };
+  } catch (error) {
+    console.error("Fetch doctors error:", error);
+  }
+};
 
   useEffect(() => {
     fetchDoctors();
@@ -166,46 +172,43 @@ export default function AddDoctorPage() {
   // };
 
 
-
-  const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
-  e.preventDefault(); // prevent page reload
+const handleAdd = async (e: FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
   try {
+
     if (!formData.name || !formData.specialization || !formData.email || !formData.phone) {
       return showToast("Please fill all required fields", "error");
     }
 
+    setLoading(true);
+
     const payload = new FormData();
 
-    // append text fields
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "image" && value) {
-        payload.append("image", value as File); // File object for image
+        payload.append("image", value as File);
       } else {
-        payload.append(key, value as string); // string for other fields
+        payload.append(key, value as string);
       }
     });
 
-    // append availability slots
     payload.append("availabilitySlots", JSON.stringify(availability));
 
-    // POST to backend
-    const res = await fetch(`${API_URL}/api/doctors`);
+    const res = await fetch(`${API_URL}/api/doctors`, {
+      method: "POST",
+      body: payload
+    });
 
-if (!res.ok) {
-  const text = await res.text();
-  console.error("Server Error:", text);
-  return;
-}
+    const data = await res.json();
 
-const data = await res.json();
     if (!res.ok) {
-      return showToast(data.message || "Failed to add doctor", "error");
+      showToast(data.message || "Failed to add doctor", "error");
+      return;
     }
 
     showToast("Doctor added successfully", "success");
 
-    // Reset form
     setFormData({
       name: "",
       specialization: "",
@@ -216,17 +219,19 @@ const data = await res.json();
       certifications: "",
       languages: "",
       hospital: "",
-      image: null,
+      image: null
     });
+
     setPreview(null);
     setAvailability([]);
 
-    // Refresh doctor list
     fetchDoctors();
 
   } catch (error) {
-    console.error("ADD ERROR:", error);
+    console.error(error);
     showToast("Server error", "error");
+  } finally {
+    setLoading(false);
   }
 };
   // ================= UPDATE =================
@@ -411,11 +416,11 @@ const data = await res.json();
       {/* Image */}
       <td>
         <img
-          src={`${API_URL}${d.image}`}
-          width={40}
-          height={40}
-          className="rounded-circle"
-        />
+  src={d.image}
+  width={40}
+  height={40}
+  className="rounded-circle"
+/>
       </td>
 
       {/* Doctor Name */}
@@ -436,7 +441,7 @@ const data = await res.json();
           className="btn btn-sm btn-warning"
           onClick={() => {
             setEditDoctor(d);
-            setPreview(`${API_URL}${d.image}`);
+            setPreview(d.image);
           }}
         >
           Edit
